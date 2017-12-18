@@ -36,7 +36,6 @@ class Login
     @given_environments = environments.raw
     @responses = []
     environments.raw.each do |env|
-      p env[0]
       add_environment_payload = {"name":"#{env[0]}"}.to_json
       url = "https://www.apimation.com/environments"
       headers = {"Content-Type" => 'application/json'}
@@ -66,7 +65,6 @@ class Login
       response_hash = JSON.parse(response)
       @env_ids.push(response_hash['id'])
     end
-    p @env_ids
   end
 
   def add_global_variables
@@ -75,10 +73,8 @@ class Login
       url = "https://www.apimation.com/environments/#{env_id}"
       headers = {"Content-Type" => 'application/json'}
       add_variables_response = @api.put(url, headers: headers, payload: payload, cookies: @login_cookie)
-      p add_variables_response
       code = add_variables_response.code
-      add_variables_response_hash = JSON.parse(add_variables_response)
-      raise "Did not add variables, #{code} \n #{add_variables_response_hash}" unless code == 200
+      raise "Did not add variables, #{code} \n #{add_variables_response}" unless code == 204
     end
   end
 
@@ -97,16 +93,73 @@ class Login
     full_error = ''
     @del_env_responses.each do |response|
       code = response.code
-      p response
-      unless code == 200
+      unless code == 204
         full_error = full_error +
-                     "Could not add env #{@given_environments[env_counter]}, #{code}" +
+                     "Could not delete env #{@given_environments[env_counter]}, #{code}" +
                      "\n" +
-                     "#{JSON.parse(response)}" +
+                     "#{response}" +
                      "\n\n"
       end
       env_counter += 1
     end
     raise full_error unless full_error == ''
+  end
+
+  def delete_all_environments
+    url = "https://www.apimation.com/environments"
+    response = @api.get(url, cookies: @login_cookie)
+    response_hash = JSON.parse(response)
+    response_hash.each do |env|
+      p env
+      name = env['name']
+      id = env['id']
+      url = "https://www.apimation.com/environments/#{id}"
+      headers = {"Content-Type" => 'application/json'}
+      del_env_response = @api.del(url, headers: headers, cookies: @login_cookie)
+      p del_env_response.code
+    end
+  end
+
+  def add_collection(name)
+    url = "https://www.apimation.com/collections"
+    payload = {"name":"#{name}","description":""}.to_json
+    @collection_response = @api.post(url, payload: payload, cookies: @login_cookie)
+    hash = JSON.parse(@collection_response)
+    @collection_id = hash['id']
+  end
+
+  def validate_collection_added
+    p @collection_response
+    p JSON.parse(@collection_response)
+    code = @collection_response.code
+    hash = JSON.parse(@collection_response)
+    raise "Unlucky, #{code}, #{hash}" unless code == 200
+  end
+
+  def add_request_to_collection
+    url = "https://www.apimation.com/steps"
+    headers = {"Content-Type" => 'application/json'}
+    payload = {"name":"new_request","description":"some_description",
+              "request":
+                {"method":"GET","url":"perfect/url","type":"raw","body":"decent and informing description","binaryContent":
+                  {"value":"","filename":""},
+                "urlEncParams":
+                  [{"name":"","value":""}],
+                "formData":
+                  [{"type":"text","value":"","name":"","filename":""}],
+                "headers":
+                  [{"name":"heeaaaa","value":"derrrrrr"}],
+                "greps":[],
+                "auth":
+                  {"type":"noAuth","data":{}}
+                },
+              "paste":false,"collection_id":"#{@collection_id}"}.to_json
+    @add_request_response = @api.post(url, headers: headers, payload: payload, cookies: @login_cookie)
+    puts @add_request_response
+  end
+
+  def validate_added_request
+    code = @add_request_response.code
+    raise "Did not add request, #{code} \n #{@add_variables_response}" unless code == 200
   end
 end

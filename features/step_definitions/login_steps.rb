@@ -1,4 +1,3 @@
-require_relative 'login'
 When(/^I try to log in Apimation$/) do
   @test_login.test_login
 end
@@ -29,4 +28,24 @@ end
 
 Then(/^environments are successfully deleted$/) do
   @test_login.validate_environments_deleted
+end
+
+When(/^I delete all environments$/) do
+  @test_login.delete_all_environments
+end
+
+When(/^I add collection$/) do
+  @test_login.add_collection('TESTAPIb')
+end
+
+Then(/^collection was added successfully$/) do
+  @test_login.validate_collection_added
+end
+
+When(/^I add request to this collection$/) do
+  @test_login.add_request_to_collection
+end
+
+Then(/^request was added successfully$/) do
+  @test_login.validate_added_request
 end
