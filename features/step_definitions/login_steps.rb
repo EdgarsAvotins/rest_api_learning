@@ -35,7 +35,7 @@ When(/^I delete all environments$/) do
 end
 
 When(/^I add collection$/) do
-  @test_login.add_collection('TESTAPIb')
+  @test_login.add_collection('TESTAPI')
 end
 
 Then(/^collection was added successfully$/) do
