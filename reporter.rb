@@ -6,7 +6,8 @@ job_url = ARGV[1]
 
 thumbnail = {'url' => 'https://image.spreadshirtmedia.com/image-server/v1/mp/compositions/1020402791/views/1,width=300,height=300,backgroundColor=E8E8E8,version=1498225413/perhaps-cow-meme.jpg'}
 fields = []
-fields.push({'name' => 'perhaps', 'value' => 'perhaps'})
+fields.push({'name' => 'Build number', 'value' => "#{build_number}"})
+fields.push({'name' => 'Build number', 'value' => "#{job_url}"})
 embed = []
 embed.push('title' => 'perhaps',
   'color' => 2210844,
@@ -14,7 +15,7 @@ embed.push('title' => 'perhaps',
   'thumbnail' => thumbnail,
 )
 
-payload = {'content' => "#{build_number}\n #{job_url}", 'embeds' => embed}.to_json
+payload = {'content' => "report", 'embeds' => embed}.to_json
 url = "https://discordapp.com/api/webhooks/393067525451022336/uz2WgUi_8-6oS9zy2Pu_3l_-CtQvabdSlgflF_ojyxTxWgxO_8Vdj0qBDMNixDj6wlT1"
 
 @api = Api.new
